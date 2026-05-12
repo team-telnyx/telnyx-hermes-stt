@@ -76,7 +76,13 @@ Local tests do **not** require `TELNYX_API_KEY`. Live tests are skipped unless c
 
 ## Verify in Hermes
 
-After installing the plugin into `~/.hermes/plugins/transcription-providers/telnyx`, use the Hermes provider discovery command for your Hermes version. Expected result: provider `telnyx-stt` appears with aliases `telnyx-transcription` and `telnyx-speech-to-text`.
+After installing the plugin into `~/.hermes/plugins/transcription-providers/telnyx`, verify Hermes discovers the provider:
+
+```bash
+hermes providers list
+```
+
+Expected result: provider `telnyx-stt` appears with aliases `telnyx-transcription` and `telnyx-speech-to-text`.
 
 If Hermes is not installed locally, the runtime tests in this repo stub the minimal Hermes provider interface and verify that the plugin registers the expected profile.
 

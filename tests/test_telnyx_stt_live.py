@@ -57,7 +57,9 @@ def _redact_secret_ids(text: str) -> str:
     return re.sub(r"KEY[A-Z0-9_]+", "KEY…REDACTED", text)
 
 
-def _multipart_body(audio: bytes, model: str, language: str = "en") -> tuple[bytes, str]:
+def _multipart_body(audio: bytes, model: str, language: str | None = None) -> tuple[bytes, str]:
+    if language is None:
+        language = os.environ.get("TELNYX_STT_LANGUAGE", "en")
     boundary = f"----TelnyxHermesBoundary{uuid.uuid4().hex}"
     body: list[bytes] = []
 
@@ -86,7 +88,8 @@ def _multipart_body(audio: bytes, model: str, language: str = "en") -> tuple[byt
 def test_transcription_endpoint_returns_text_field():
     endpoint = os.environ.get("TELNYX_STT_BASE_URL", _assigned_constant("TELNYX_STT_DEFAULT_BASE_URL"))
     model = _assigned_constant("TELNYX_STT_DEFAULT_MODEL")
-    body, boundary = _multipart_body(_tiny_wav_bytes(), model)
+    language = os.environ.get("TELNYX_STT_LANGUAGE", "en")
+    body, boundary = _multipart_body(_tiny_wav_bytes(), model, language)
 
     req = urllib.request.Request(
         endpoint,
