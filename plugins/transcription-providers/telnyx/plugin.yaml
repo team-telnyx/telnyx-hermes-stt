@@ -1,9 +1,0 @@
-name: telnyx-stt
-kind: transcription-provider
-version: 0.1.0
-description: Telnyx STT — Speech-to-Text transcription via https://api.telnyx.com/v2/ai/audio/transcriptions
-author: Telnyx
-provider_id: telnyx-stt
-aliases:
-  - telnyx-transcription
-  - telnyx-speech-to-text

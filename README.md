@@ -1,118 +1,97 @@
-# Telnyx STT Provider for Hermes
+# Telnyx STT — Hermes Agent Contribution
 
-Telnyx Speech-to-Text provider plugin for [Hermes Agent](https://github.com/team-telnyx/telapps-hermes) using the Telnyx AI transcription endpoint.
+This repository contains the Telnyx Speech-to-Text provider implementation for
+[Hermes Agent](https://github.com/team-telnyx/hermes-agent).
 
-- Provider ID: `telnyx-stt`
-- Aliases: `telnyx-transcription`, `telnyx-speech-to-text`
-- Endpoint: `https://api.telnyx.com/v2/ai/audio/transcriptions`
-- Default model: `openai/whisper-large-v3-turbo`
-- Auth: `TELNYX_API_KEY`
+It is **not** a standalone plugin. Hermes handles STT through built-in providers
+dispatched in `tools/transcription_tools.py`. This repo contains the Telnyx
+provider function and tests ready to be contributed upstream.
 
-## What this plugin does
+## What's inside
 
-This plugin registers a Hermes transcription-provider profile for Telnyx STT. It gives Hermes the endpoint, auth type, provider metadata, default model, supported audio formats, and response shape needed to send audio files to Telnyx for transcription.
+| File | Purpose |
+|------|---------|
+| `telnyx_stt_provider.py` | Drop-in implementation for `tools/transcription_tools.py` |
+| `tests/test_telnyx_stt_static.py` | AST-based constant/signature checks (no credentials) |
+| `tests/test_telnyx_stt_runtime.py` | Full transcription test with mocked openai client (no credentials) |
+| `tests/test_telnyx_stt_live.py` | Live API test (requires `TELNYX_API_KEY`) |
 
-The Telnyx API request is multipart form-data:
+## Integration into hermes-agent
 
-```text
-POST /v2/ai/audio/transcriptions
-Authorization: Bearer $TELNYX_API_KEY
-Content-Type: multipart/form-data
+### 1. Add the constants
 
-file=<audio file>
-model=openai/whisper-large-v3-turbo
-language=en
+Add to the constants section of `tools/transcription_tools.py`:
+
+```python
+TELNYX_STT_DEFAULT_BASE_URL = "https://api.telnyx.com/v2/ai/openai"
+TELNYX_STT_DEFAULT_MODEL    = "openai/whisper-large-v3-turbo"
+TELNYX_STT_DEFAULT_LANGUAGE = os.environ.get("TELNYX_STT_LANGUAGE", "en")
 ```
 
-The response includes a `text` field with the transcript.
+### 2. Copy the provider function
 
-## Installation
+Copy `_transcribe_telnyx` from `telnyx_stt_provider.py` into
+`tools/transcription_tools.py` alongside the other `_transcribe_*` functions.
 
-Install Hermes first, then copy this provider into Hermes' plugin directory:
+> **Note:** when integrating:
+> - Replace `_get_env_value` with the existing module-level `get_env_value`.
+> - Replace `_HAS_OPENAI` with the existing module-level `_HAS_OPENAI`.
+> - Replace the inline transcript extraction with the existing `_extract_transcript_text` helper.
+
+### 3. Add the dispatch branch
+
+In `transcribe_audio`, add before the final `# No provider available` return:
+
+```python
+if provider == "telnyx":
+    model_name = model or TELNYX_STT_DEFAULT_MODEL
+    return _transcribe_telnyx(file_path, model_name)
+```
+
+### 4. No new dependencies
+
+The existing `openai` package (already a Hermes dependency) is used with the
+Telnyx base URL — no additional packages required.
+
+## Provider details
+
+| Field | Value |
+|-------|-------|
+| Provider ID | `telnyx` |
+| Endpoint | `https://api.telnyx.com/v2/ai/openai/audio/transcriptions` |
+| Default model | `openai/whisper-large-v3-turbo` |
+| Protocol | OpenAI-compatible (`multipart/form-data`) |
+| Auth | `TELNYX_API_KEY` (Bearer) |
+| Base URL override | `TELNYX_STT_BASE_URL` env var |
+| Language override | `TELNYX_STT_LANGUAGE` env var (ISO-639-1, default `en`) |
+
+## User configuration (`~/.hermes/config.yaml`)
+
+```yaml
+stt:
+  provider: telnyx
+  # Optional overrides:
+  # telnyx:
+  #   model: openai/whisper-large-v3-turbo
+```
+
+## Running tests
 
 ```bash
-mkdir -p ~/.hermes/plugins/transcription-providers
-cp -R plugins/transcription-providers/telnyx \
-  ~/.hermes/plugins/transcription-providers/telnyx
+# No credentials needed
+python -m pytest tests/test_telnyx_stt_static.py tests/test_telnyx_stt_runtime.py -q
+
+# Live test (requires TELNYX_API_KEY)
+export TELNYX_API_KEY=***
+python -m pytest tests/test_telnyx_stt_live.py -q
 ```
 
-Expected files after install:
+## Linear
 
-```text
-~/.hermes/plugins/transcription-providers/telnyx/plugin.yaml
-~/.hermes/plugins/transcription-providers/telnyx/__init__.py
-```
+AIF-196
 
-## Configuration
+## References
 
-Required:
-
-```bash
-export TELNYX_API_KEY="KEY..."
-```
-
-Optional:
-
-```bash
-# Override the default Telnyx transcription endpoint.
-export TELNYX_STT_BASE_URL="https://api.telnyx.com/v2/ai/audio/transcriptions"
-
-# ISO-639-1 language hint sent by Hermes when supported by its STT runtime.
-export TELNYX_STT_LANGUAGE="en"
-```
-
-## Verify locally
-
-Run the plugin tests:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip pytest
-python -m pytest -q
-```
-
-Local tests do **not** require `TELNYX_API_KEY`. Live tests are skipped unless credentials are present.
-
-## Verify in Hermes
-
-After installing the plugin into `~/.hermes/plugins/transcription-providers/telnyx`, verify Hermes discovers the provider:
-
-```bash
-hermes providers list
-```
-
-Expected result: provider `telnyx-stt` appears with aliases `telnyx-transcription` and `telnyx-speech-to-text`.
-
-If Hermes is not installed locally, the runtime tests in this repo stub the minimal Hermes provider interface and verify that the plugin registers the expected profile.
-
-## Live Telnyx verification
-
-Set `TELNYX_API_KEY` and run:
-
-```bash
-python -m pytest -q tests/test_telnyx_stt_live.py
-```
-
-The live test posts a tiny generated WAV tone file to:
-
-```text
-https://api.telnyx.com/v2/ai/audio/transcriptions
-```
-
-It verifies that Telnyx returns a JSON response with a `text` field. The generated audio is a short tone, so the transcript may be empty; the contract validation is response-shape focused.
-
-## Supported audio formats
-
-- MP3: `audio/mpeg`
-- WAV: `audio/wav`
-- OGG: `audio/ogg`
-- M4A: `audio/mp4`
-- WebM: `audio/webm`
-
-## Development notes
-
-- The implementation intentionally mirrors the Hermes TTS provider pattern.
-- `TELNYX_STT_BASE_URL` is read directly by plugin code, so endpoint overrides are test-covered.
-- `plugin.yaml` name/provider ID and Python profile name all use `telnyx-stt` to avoid manifest/provider mismatch.
-- `pyproject.toml` exists for metadata and test tooling; Hermes installation is copy-based.
+- [Telnyx AI API docs](https://developers.telnyx.com/docs/ai)
+- [Telnyx API keys](https://portal.telnyx.com/#/app/api-keys)
+- [hermes-agent transcription_tools.py](https://github.com/team-telnyx/hermes-agent/blob/main/tools/transcription_tools.py)
