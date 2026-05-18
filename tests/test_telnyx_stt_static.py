@@ -38,7 +38,7 @@ def test_provider_module_exists():
 
 def test_default_base_url():
     assert _assigned_constant("TELNYX_STT_DEFAULT_BASE_URL") == \
-        "https://api.telnyx.com/v2/ai/openai"
+        "https://api.telnyx.com/v2/ai"
 
 
 def test_default_model():

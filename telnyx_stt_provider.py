@@ -27,7 +27,7 @@ Endpoint
 --------
 The Telnyx STT endpoint is OpenAI-compatible:
 
-    POST https://api.telnyx.com/v2/ai/openai/audio/transcriptions
+    POST https://api.telnyx.com/v2/ai/audio/transcriptions
     Authorization: Bearer <TELNYX_API_KEY>
 
 The ``openai`` Python client is pointed at the Telnyx base URL, so the
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 
 # ── Constants (add/merge these into tools/transcription_tools.py) ──────────
 
-TELNYX_STT_DEFAULT_BASE_URL = "https://api.telnyx.com/v2/ai/openai"
+TELNYX_STT_DEFAULT_BASE_URL = "https://api.telnyx.com/v2/ai"
 TELNYX_STT_DEFAULT_MODEL = "openai/whisper-large-v3-turbo"
 TELNYX_STT_DEFAULT_LANGUAGE = os.environ.get("TELNYX_STT_LANGUAGE", "en")
 

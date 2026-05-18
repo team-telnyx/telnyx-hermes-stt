@@ -1,7 +1,7 @@
 # Telnyx STT — Hermes Agent Contribution
 
 This repository contains the Telnyx Speech-to-Text provider implementation for
-[Hermes Agent](https://github.com/team-telnyx/hermes-agent).
+[Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
 It is **not** a standalone plugin. Hermes handles STT through built-in providers
 dispatched in `tools/transcription_tools.py`. This repo contains the Telnyx
@@ -23,7 +23,7 @@ provider function and tests ready to be contributed upstream.
 Add to the constants section of `tools/transcription_tools.py`:
 
 ```python
-TELNYX_STT_DEFAULT_BASE_URL = "https://api.telnyx.com/v2/ai/openai"
+TELNYX_STT_DEFAULT_BASE_URL = "https://api.telnyx.com/v2/ai"
 TELNYX_STT_DEFAULT_MODEL    = "openai/whisper-large-v3-turbo"
 TELNYX_STT_DEFAULT_LANGUAGE = os.environ.get("TELNYX_STT_LANGUAGE", "en")
 ```
@@ -58,7 +58,7 @@ Telnyx base URL — no additional packages required.
 | Field | Value |
 |-------|-------|
 | Provider ID | `telnyx` |
-| Endpoint | `https://api.telnyx.com/v2/ai/openai/audio/transcriptions` |
+| Endpoint | `https://api.telnyx.com/v2/ai/audio/transcriptions` |
 | Default model | `openai/whisper-large-v3-turbo` |
 | Protocol | OpenAI-compatible (`multipart/form-data`) |
 | Auth | `TELNYX_API_KEY` (Bearer) |
@@ -94,4 +94,4 @@ AIF-196
 
 - [Telnyx AI API docs](https://developers.telnyx.com/docs/ai)
 - [Telnyx API keys](https://portal.telnyx.com/#/app/api-keys)
-- [hermes-agent transcription_tools.py](https://github.com/team-telnyx/hermes-agent/blob/main/tools/transcription_tools.py)
+- [hermes-agent transcription_tools.py](https://github.com/NousResearch/hermes-agent/blob/main/tools/transcription_tools.py)

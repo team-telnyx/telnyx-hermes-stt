@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "telnyx-hermes-stt"
 version = "0.1.0"
-description = "Telnyx STT transcription-provider plugin for Hermes"
+description = "Telnyx STT provider contribution for Hermes Agent — integrates into tools/transcription_tools.py"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "Telnyx" }]
 license = { text = "MIT" }
-keywords = ["hermes", "telnyx", "stt", "speech-to-text", "transcription-provider"]
+keywords = ["hermes", "telnyx", "stt", "speech-to-text", "transcription"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

@@ -137,7 +137,7 @@ def test_transcribe_telnyx_custom_base_url(tmp_path, monkeypatch):
     fake_openai.APIConnectionError = Exception
     fake_openai.APITimeoutError = Exception
     monkeypatch.setitem(sys.modules, "openai", fake_openai)
-    monkeypatch.setenv("TELNYX_STT_BASE_URL", "https://staging.example.com/v2/ai/openai")
+    monkeypatch.setenv("TELNYX_STT_BASE_URL", "https://staging.example.com/v2/ai")
 
     mod = _load_module(monkeypatch)
     mod._transcribe_telnyx(str(audio), "openai/whisper-large-v3-turbo")
