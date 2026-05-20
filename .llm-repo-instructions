@@ -1,0 +1,9 @@
+# Repository Instructions
+
+This repository contains a standalone Hermes provider plugin. Keep the code small, explicit, and easy to audit.
+
+Rules:
+- Do not commit secrets or generated audio.
+- Keep `main` minimal/stable; implementation happens on Linear-linked feature branches.
+- Local tests must pass without Telnyx credentials; live tests must be skipped unless `TELNYX_API_KEY` is set.
+- README and SKILL.md must agree on provider IDs, environment variables, paths, and endpoints.
