@@ -126,6 +126,9 @@ def _transcribe_telnyx(file_path: str, model_name: str) -> Dict[str, Any]:
     base_url = str(
         _env("TELNYX_STT_BASE_URL") or TELNYX_STT_DEFAULT_BASE_URL
     ).strip().rstrip("/")
+    language = str(
+        _env("TELNYX_STT_LANGUAGE") or TELNYX_STT_DEFAULT_LANGUAGE or ""
+    ).strip()
 
     # In transcription_tools.py replace _openai_available() with the module-level _HAS_OPENAI.
     if not _openai_available():
@@ -141,11 +144,15 @@ def _transcribe_telnyx(file_path: str, model_name: str) -> Dict[str, Any]:
         client = OpenAI(api_key=api_key, base_url=base_url, timeout=30, max_retries=0)
         try:
             with open(file_path, "rb") as audio_file:
-                transcription = client.audio.transcriptions.create(
-                    model=model_name,
-                    file=audio_file,
-                    response_format="json",
-                )
+                transcription_kwargs = {
+                    "model": model_name,
+                    "file": audio_file,
+                    "response_format": "json",
+                }
+                if language:
+                    transcription_kwargs["language"] = language
+
+                transcription = client.audio.transcriptions.create(**transcription_kwargs)
 
             # _extract_transcript_text exists in transcription_tools.py.
             # Here we inline the same logic for standalone use.

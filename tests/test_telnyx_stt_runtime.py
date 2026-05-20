@@ -86,6 +86,21 @@ def test_transcribe_telnyx_passes_correct_model(tmp_path, monkeypatch):
     assert call_kwargs.kwargs.get("model") == "openai/whisper-large-v3-turbo"
 
 
+def test_transcribe_telnyx_passes_language_hint(tmp_path, monkeypatch):
+    """TELNYX_STT_LANGUAGE should be forwarded to the OpenAI-compatible request."""
+    audio = tmp_path / "audio.wav"
+    audio.write_bytes(b"FAKEAUDIO")
+
+    monkeypatch.setenv("TELNYX_STT_LANGUAGE", "es")
+    fake_client = _stub_openai_client(monkeypatch)
+    mod = _load_module(monkeypatch)
+
+    mod._transcribe_telnyx(str(audio), "openai/whisper-large-v3-turbo")
+
+    call_kwargs = fake_client.audio.transcriptions.create.call_args
+    assert call_kwargs.kwargs.get("language") == "es"
+
+
 def test_transcribe_telnyx_uses_telnyx_base_url(tmp_path, monkeypatch):
     """OpenAI client must be initialised with the Telnyx base URL."""
     audio = tmp_path / "audio.wav"
