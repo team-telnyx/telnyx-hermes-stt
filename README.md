@@ -16,6 +16,11 @@ provider function and tests ready to be contributed upstream.
 | `tests/test_telnyx_stt_runtime.py` | Full transcription test with mocked openai client (no credentials) |
 | `tests/test_telnyx_stt_live.py` | Live API test (requires `TELNYX_API_KEY`) |
 
+## Setup Walkthrough
+
+Watch the full setup walkthrough:
+[![Hermes STT setup walkthrough](docs/assets/hermes-stt-setup-walkthrough.png)](docs/assets/hermes-stt-setup-walkthrough.mp4)
+
 ## Integration into hermes-agent
 
 ### 1. Add the constants
